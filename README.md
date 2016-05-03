@@ -4,8 +4,8 @@ This is a [Heroku buildpack][0] for bundling a compatible [wkhtmltopdf][1] binar
 
 ## Versions
 
-* Buildpack:   `0.2`
-* wkhtmltopdf: `0.12.2.1`
+* Buildpack:   `0.3`
+* wkhtmltopdf: `0.12.3`
 
 ## Usage
 
@@ -41,6 +41,16 @@ If you are on an older stack, you can upgrade to `cedar-14` with:
 ```bash
 $ heroku stack:set cedar-14
 ```
+
+Note that wkhtmltopdf 0.12.3 depends on the following Debian/Ubuntu packages in
+runtime:
+
+- libfontconfig1
+- libx11-6
+- libxext6
+- libxrender1
+
+Fortunately, the `cedar-14` stack has all of those pre-installed.
 
 [0]: http://devcenter.heroku.com/articles/buildpacks
 [1]: http://wkhtmltopdf.org/
