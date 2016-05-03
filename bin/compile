@@ -29,6 +29,8 @@ tar xf $WKHTMLTOPDF_ARC -C $TMP_PATH
 
 echo "-----> Moving binaries to the right place"
 mv $TMP_PATH/wkhtmltox/bin/* $BIN_PATH/
+mkdir -p $BUILD_DIR/.profile.d
+echo 'PATH=$PATH:$HOME/bin' > $BUILD_DIR/.profile.d/wkhtmltopdf.sh
 
 echo "-----> Cleaning up"
 rm -rf $TMP_PATH/wkhtmltox
