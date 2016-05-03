@@ -22,7 +22,7 @@ Remember to clean your repository cache if you are updating the version of build
 
 ```bash
 $ heroku plugins:install https://github.com/heroku/heroku-repo.git
-$ heroku repo:purge_cache -a appname
+$ heroku repo:purge-cache -a appname
 ```
 
 ## Troubleshooting
