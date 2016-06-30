@@ -1,53 +1,42 @@
 #!/usr/bin/env bash
 # bin/compile <build-dir> <cache-dir>
 
-function indent() {
-  c='s/^/       /'
-  case $(uname) in
-    Darwin) sed -l "$c";;
-    *)      sed -u "$c";;
-  esac
-}
+set -e
 
 BUILD_DIR=$1
 CACHE_DIR=$2
 
-DEB="$CACHE_DIR/wkhtmltopdf.deb"
-TS=`date +%s`
+BIN_PATH="$BUILD_DIR/bin"
+TMP_PATH="$BUILD_DIR/tmp"
+mkdir -p $CACHE_DIR $BIN_PATH $TMP_PATH
 
-echo "custom wkhtmltopdf build pack"
+WKHTMLTOPDF_URL="http://download.gna.org/wkhtmltopdf/0.12/0.12.3/wkhtmltox-0.12.3_linux-generic-amd64.tar.xz"
+WKHTMLTOPDF_ARC="$CACHE_DIR/$(basename $WKHTMLTOPDF_URL)"
+WKHTMLTOPDF_BINARIES="$WKHTMLTOPDF_PATH/usr/local/bin"
 
-if [ ! -d "$BUILD_DIR" ]; then
-  echo "creating $BUILD_DIR"
-  mkdir $BUILD_DIR
+BIN_DIR=$(cd $(dirname $0); pwd)
+FONTS_DIR=$(cd "$BIN_DIR/../fonts"; pwd)
+
+if [ -f $WKHTMLTOPDF_ARC ]; then
+  echo "-----> Using wkhtmltopdf 0.12.3 archive from cache"
+else
+  echo "-----> Downloading wkhtmltopdf 0.12.3 archive"
+  curl -L $WKHTMLTOPDF_URL -o $WKHTMLTOPDF_ARC
 fi
 
-if [ ! -d "$CACHE_DIR" ]; then
-  echo "creating $CACHE_DIR"
-  mkdir $CACHE_DIR
-fi
+echo "-----> Unpacking archive"
+tar xf $WKHTMLTOPDF_ARC -C $TMP_PATH
 
-if [ ! -f $DEB ]; then
-  echo "Build dir ${BUILD_DIR}"
-  echo "Cache dir ${CACHE_DIR}"
-  WKHTMLTOPDF_DOWNLOAD_URL="http://download.gna.org/wkhtmltopdf/0.12/0.12.2.1/wkhtmltox-0.12.2.1_linux-trusty-amd64.deb"
-  echo "-----> Downloading wkhtmltopdf: $WKHTMLTOPDF_DOWNLOAD_URL"
-  curl -L --silent -o $DEB $WKHTMLTOPDF_DOWNLOAD_URL
-  ls -alh $CACHE_DIR
-fi
-
-echo "-----> Installing wkhtmltopdf 0.12.2.1"
-mkdir -p $BUILD_DIR/.apt
-dpkg -x $DEB $BUILD_DIR/.apt/
-
-echo "Writing profile script" | indent
+echo "-----> Moving binaries to the right place"
+mv $TMP_PATH/wkhtmltox/bin/* $BIN_PATH/
 mkdir -p $BUILD_DIR/.profile.d
-cat <<EOF >$BUILD_DIR/.profile.d/wkhtmltopdf.sh
-export PATH="\$HOME/.apt/usr/local/bin:\$PATH"
-export LD_LIBRARY_PATH="\$HOME/.apt/usr/local/lib/x86_64-linux-gnu:\$HOME/.apt/usr/local/lib/i386-linux-gnu:\$HOME/.apt/usr/local/lib:\$LD_LIBRARY_PATH"
-export LIBRARY_PATH="\$HOME/.apt/usr/local/lib/x86_64-linux-gnu:\$HOME/.apt/usr/local/lib/i386-linux-gnu:\$HOME/.apt/usr/local/lib:\$LIBRARY_PATH"
-export INCLUDE_PATH="\$HOME/.apt/usr/local/include:\$INCLUDE_PATH"
-export CPATH="\$INCLUDE_PATH"
-export CPPPATH="\$INCLUDE_PATH"
-export PKG_CONFIG_PATH="\$HOME/.apt/usr/local/lib/x86_64-linux-gnu/pkgconfig:\$HOME/.apt/usr/local/lib/i386-linux-gnu/pkgconfig:\$HOME/.apt/usr/local/lib/pkgconfig:\$PKG_CONFIG_PATH"
-EOF
+echo 'PATH=$PATH:$HOME/bin' > $BUILD_DIR/.profile.d/wkhtmltopdf.sh
+
+echo "-----> Cleaning up"
+rm -rf $TMP_PATH/wkhtmltox
+
+echo "-----> Installing fonts"
+mkdir -p $1/.fonts
+ls $FONTS_DIR
+cp $FONTS_DIR/* $1/.fonts/
+fc-cache -f $1/.fonts
