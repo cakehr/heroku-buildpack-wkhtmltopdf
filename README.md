@@ -1,71 +1,53 @@
-# Heroku Buildpack: wkhtmltopdf
+# wkhtmltopdf Buildpack
 
-This is a [Heroku buildpack](http://devcenter.heroku.com/articles/buildpacks) for using [wkhtmltopdf](http://wkhtmltopdf.org/) in your application.
+This is a [Heroku buildpack][0] for bundling a compatible [wkhtmltopdf][1] binary with your environment.
 
-It is designed to be used with [heroku-buildpack-multi](https://github.com/ddollar/heroku-buildpack-multi) to combine it with the appropriate real buildpack for your app.
+## Versions
 
-This is based on https://github.com/jayzes/heroku-buildpack-pngquant.
-
-### Versions
-
-The following wkhtmltopdf versions are available:
-
-[Version 0.12.2.1 released on January 19, 2015](https://github.com/rafaelp/heroku-buildpack-wkhtmltopdf/tree/0.12.2.1)
-
-[Version 0.12.1 released on June 26, 2014](https://github.com/rafaelp/heroku-buildpack-wkhtmltopdf/tree/0.12.1)
-
-This branch works with version `0.12.2.1`
-
-### Stack
-
-This is designed to be used on [Cedar-14 Stack](https://devcenter.heroku.com/articles/cedar).
+* Buildpack:   `0.3`
+* wkhtmltopdf: `0.12.3`
 
 ## Usage
 
-Add a `.buildpacks` file to the root of your repo that contains this buildpack URL and your real buildpack URL:
+This buildpack only installs wkhtmltopdf, it isn't very useful by itself. You'll probably want to use it as part of a multi-buildpack. Here is an example using the Ruby buildpack.
 
-    https://github.com/rafaelp/heroku-buildpack-wkhtmltopdf#0.12.2.1
-    https://github.com/heroku/heroku-buildpack-ruby
+```bash
+$ heroku buildpacks:set https://github.com/heroku/heroku-buildpack-ruby.git
+$ heroku buildpacks:add https://github.com/dscout/wkhtmltopdf-buildpack.git
+```
 
-Then create an application using the multi buildpack:
-
-    $ heroku create --stack cedar-14 --buildpack https://github.com/ddollar/heroku-buildpack-multi
-
-or configure an existing application:
-
-    $ heroku config BUILDPACK_URL=https://github.com/ddollar/heroku-buildpack-multi
-
-Deploy your applicatio.
-
-    $ git push heroku master
+### Clearing Repo Cache
 
 Remember to clean your repository cache if you are updating the version of buildpack. To do that, run:
 
-    $ heroku plugins:install https://github.com/heroku/heroku-repo.git
-    $ heroku repo:purge_cache -a appname
+```bash
+$ heroku plugins:install https://github.com/heroku/heroku-repo.git
+$ heroku repo:purge-cache -a appname
+```
 
-You can verify that everything is properly installed by running the following command:
+## Troubleshooting
 
-    $ heroku run "wkhtmltopdf -V"
+If you run into issues when trying to deploy with this buildpack, make sure your app is running on Cedar with Ubuntu 14.04 (`cedar-14`). You can check this with:
 
-The output should be:
+```bash
+$ heroku stack
+```
 
-    wkhtmltopdf 0.12.2.1 (with patched qt)
+If you are on an older stack, you can upgrade to `cedar-14` with:
 
-## Issues
+```bash
+$ heroku stack:set cedar-14
+```
 
-If you have problems, please create a [Github Issue](https://github.com/rafaelp/heroku-buildpack-wkhtmltopdf/issues).
+Note that wkhtmltopdf 0.12.3 depends on the following Debian/Ubuntu packages in
+runtime:
 
-## Credits
+- libfontconfig1
+- libx11-6
+- libxext6
+- libxrender1
 
-heroku-buildpack-wkhtmltopdf was originally written by [Rafael Lima](http://rafael.adm.br).
+Fortunately, the `cedar-14` stack has all of those pre-installed.
 
-Working at [Boleto Simples](https://boletosimples.com.br)
-
-Github: [http://github.com/rafaelp](http://github.com/rafaelp)
-
-Twitter: [http://twitter.com/rafaelp](http://twitter.com/rafaelp)
-
-## License
-
-heroku-buildpack-wkhtmltopdf is Copyright © 2014 Rafael Lima. It is free software, and may be redistributed under the terms specified in the [LICENSE](https://github.com/rafaelp/heroku-buildpack-wkhtmltopdf/blob/master/LICENSE) file.
+[0]: http://devcenter.heroku.com/articles/buildpacks
+[1]: http://wkhtmltopdf.org/

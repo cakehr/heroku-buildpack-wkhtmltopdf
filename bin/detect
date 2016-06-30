@@ -1,8 +1,8 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
-# this pack is valid for apps deployed on cedar-14 stack
+# This buildpack is valid only for the cedar-14 stack
 if [ "$STACK" = "cedar-14" ]; then
-  echo "wkhtmltopdf"
+  echo "wkhtmltopdf-buildpack"
   exit 0
 else
   exit 1
